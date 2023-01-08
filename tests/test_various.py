@@ -96,7 +96,7 @@ class TestSuite(unittest.TestCase):
 
         self.assertEqual(test_data.calculate_sums('glass', 'weight', '2023-01-04', '2023-01-06'), float(210))
 
-    # Get all sums.
+    # Get all sums. Summing density is of dubious usage, still: was described so in the requirements. In real life would ask for confirmation.
     @unittest.mock.patch('sys.stdout', new_callable = io.StringIO)
     def test_total_sums(self, mock_stdout):
         test_data = core.Volunteer("Maris", "Svirksts", 1901, "maris.svirksts@gmail.com", "+371 29611111", "Riga", '')

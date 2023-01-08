@@ -156,6 +156,7 @@ class Volunteer(Employee):
 
         return sum(filtered_list)
 
+    # Summing density is of dubious usage, still: was described so in the requirements. In real life would ask for confirmation.
     def total_sums(self):
         garbage_type = ["glass", "paper", "plastic"]
         parameter    = ['weight', 'volume', 'density']
