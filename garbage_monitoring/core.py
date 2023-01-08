@@ -1,11 +1,11 @@
-from . import helpers
-import time
+from garbage_monitoring import helpers
+from datetime import date, datetime
 import re
 
 class Employee:
     # Long list of input variables, switch to array?
     def __init__(self, name, surname, year_of_birth, email, mobile, address, photo = ''):
-        self.__created     = int(time.time()) 
+        self.__created     = int(datetime.now().timestamp()) 
         self.name          = name
         self.surname       = surname
         self.year_of_birth = year_of_birth
@@ -104,7 +104,7 @@ class Employee:
 class Admin(Employee):
     def __init__(self, name, surname, year_of_birth, email, mobile, address, photo = '', is_admin = False):
         Employee.__init__(self, name, surname, year_of_birth, email, mobile, address, photo)
-        self.is_admin = is_admin # I'd set it automatically and forget about it, but, the task has this as a requirement
+        self.is_admin = is_admin # I'd set it automatically and forget about it, but, the task has this as a requirement.
 
     @property
     def is_admin(self):
@@ -115,4 +115,52 @@ class Admin(Employee):
         self._is_admin = helpers.check_if_true(value)
 
 class Volunteer(Employee):
-    pass
+    __date_format = '%Y-%M-%d'
+
+    def __init__(self, name, surname, year_of_birth, email, mobile, address, photo = ''):
+        Employee.__init__(self, name, surname, year_of_birth, email, mobile, address, photo)
+        self._collected_garbage = {}
+
+    def add_collected_garbage(self, garbage_type, garbage_weight, garbage_volume, date = str(date.today())):
+        allowed_types = ["glass", "paper", "plastic"]
+        if garbage_type.lower() not in allowed_types:
+            raise ValueError("Garbage Type Not Allowed: ", garbage_type)
+
+        garbage_density = float(garbage_weight) / float(garbage_volume)
+        unix_time       = int(datetime.timestamp(datetime.strptime(date, self.__date_format)))
+
+        self._collected_garbage[unix_time] = (garbage_type.lower(), float(garbage_weight), float(garbage_volume), garbage_density)
+    
+    def print_collected_garbage(self):
+        {print(f"{datetime.fromtimestamp(key).strftime(self.__date_format)}: garbage type - {values[0]}, garbage weight - {values[1]}, garbage volume - {values[2]}, garbage density - {values[3]}") for (key, values) in self._collected_garbage.items()}
+
+    def calculate_sums(self, type_of_garbage, garbage_parameter, start_date = '', end_date = ''):
+        if not start_date:
+            start_date = min(self._collected_garbage)
+        else:
+            start_date = int(datetime.timestamp(datetime.strptime(start_date, self.__date_format)))
+
+        if not end_date:
+            end_date = max(self._collected_garbage)
+        else:
+            end_date = int(datetime.timestamp(datetime.strptime(end_date, self.__date_format)))
+
+        if 'weight' == garbage_parameter:
+            parameter_to_get = 1
+        elif 'volume' == garbage_parameter:
+            parameter_to_get = 2
+        else:
+            parameter_to_get = 3
+
+        filtered_list = [values[parameter_to_get] for key, values in self._collected_garbage.items() if (values[0] == type_of_garbage.lower() and key >= start_date and key <= end_date)]
+
+        return sum(filtered_list)
+
+    def total_sums(self):
+        garbage_type = ["glass", "paper", "plastic"]
+        parameter    = ['weight', 'volume', 'density']
+
+        for x in garbage_type:
+            for y in parameter:
+                print(f"{self.calculate_sums(x, y)}: {x} {y}")
+
