@@ -1,18 +1,20 @@
-from garbage_monitoring import helpers
-from datetime import date, datetime
+"""Main functionality file."""
+
 import re
+from datetime import date, datetime
+from garbage_monitoring import helpers
 
 class Employee:
-    # Long list of input variables, switch to array?
-    def __init__(self, name, surname, year_of_birth, email, mobile, address, photo = ''):
-        self.__created     = int(datetime.now().timestamp()) 
-        self.name          = name
-        self.surname       = surname
-        self.year_of_birth = year_of_birth
-        self.email         = email
-        self.mobile        = mobile
-        self.address       = address
-        self.photo         = photo
+    """Parent class. Contains functionality used by both Admin and Volunteer classes."""
+    def __init__(self, parameters):
+        self.__created     = int(datetime.now().timestamp())
+        self.name          = parameters.get('name')
+        self.surname       = parameters.get('surname')
+        self.year_of_birth = parameters.get('year_of_birth')
+        self.email         = parameters.get('email')
+        self.mobile        = parameters.get('mobile')
+        self.address       = parameters.get('address')
+        self.photo         = parameters.get('photo', '')
 
     @property
     def created(self):
@@ -47,7 +49,7 @@ class Employee:
                 self._year_of_birth = int(value)
             else:
                 self._year_of_birth = default_value
-        except:
+        except ValueError:
             self._year_of_birth = default_value
 
     @property
@@ -91,7 +93,7 @@ class Employee:
 
     def get_email(self):
         return self._email
-    
+
     def get_mobile(self):
         return self._mobile
 
@@ -102,9 +104,10 @@ class Employee:
         helpers.base64_photo_to_file(self._photo, result_image)
 
 class Admin(Employee):
-    def __init__(self, name, surname, year_of_birth, email, mobile, address, photo = '', is_admin = False):
-        Employee.__init__(self, name, surname, year_of_birth, email, mobile, address, photo)
-        self.is_admin = is_admin # I'd set it automatically and forget about it, but, the task has this as a requirement.
+    """Data about administrators."""
+    def __init__(self, parameters, is_admin = False):
+        Employee.__init__(self, parameters)
+        self.is_admin = is_admin # I'd set it automatically, the task requires it.
 
     @property
     def is_admin(self):
@@ -115,24 +118,26 @@ class Admin(Employee):
         self._is_admin = helpers.check_if_true(value)
 
 class Volunteer(Employee):
+    """Garbage collected, timestamps and various functionality related to the actual work."""
     __date_format = '%Y-%M-%d'
 
-    def __init__(self, name, surname, year_of_birth, email, mobile, address, photo = ''):
-        Employee.__init__(self, name, surname, year_of_birth, email, mobile, address, photo)
+    def __init__(self, parameters):
+        Employee.__init__(self, parameters)
         self._collected_garbage = {}
 
-    def add_collected_garbage(self, garbage_type, garbage_weight, garbage_volume, date = str(date.today())):
+    def add_collected_garbage(self, garbage_type, garbage_weight, garbage_volume, date_gathered = str(date.today())):
         allowed_types = ["glass", "paper", "plastic"]
         if garbage_type.lower() not in allowed_types:
             raise ValueError("Garbage Type Not Allowed: ", garbage_type)
 
         garbage_density = float(garbage_weight) / float(garbage_volume)
-        unix_time       = int(datetime.timestamp(datetime.strptime(date, self.__date_format)))
+        unix_time       = int(datetime.timestamp(datetime.strptime(date_gathered, self.__date_format)))
 
         self._collected_garbage[unix_time] = (garbage_type.lower(), float(garbage_weight), float(garbage_volume), garbage_density)
-    
+
     def print_collected_garbage(self):
-        {print(f"{datetime.fromtimestamp(key).strftime(self.__date_format)}: garbage type - {values[0]}, garbage weight - {values[1]}, garbage volume - {values[2]}, garbage density - {values[3]}") for (key, values) in self._collected_garbage.items()}
+        for (key, values) in self._collected_garbage.items():
+            print(f"{datetime.fromtimestamp(key).strftime(self.__date_format)}: garbage type - {values[0]}, garbage weight - {values[1]}, garbage volume - {values[2]}, garbage density - {values[3]}")
 
     def calculate_sums(self, type_of_garbage, garbage_parameter, start_date = '', end_date = ''):
         if not start_date:
@@ -161,7 +166,6 @@ class Volunteer(Employee):
         garbage_type = ["glass", "paper", "plastic"]
         parameter    = ['weight', 'volume', 'density']
 
-        for x in garbage_type:
-            for y in parameter:
-                print(f"{self.calculate_sums(x, y)}: {x} {y}")
-
+        for current_element in garbage_type:
+            for current_parameter in parameter:
+                print(f"{self.calculate_sums(current_element, current_parameter)}: {current_element} {current_parameter}")
