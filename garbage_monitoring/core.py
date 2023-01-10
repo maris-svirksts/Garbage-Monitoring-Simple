@@ -126,14 +126,22 @@ class Volunteer(Employee):
         self._collected_garbage = {}
 
     def add_collected_garbage(self, garbage_type, garbage_weight, garbage_volume, date_gathered = str(date.today())):
+        """Check if the type of garbage is allowed, gather additional data about it."""
         allowed_types = ["glass", "paper", "plastic"]
         if garbage_type.lower() not in allowed_types:
             raise ValueError("Garbage Type Not Allowed: ", garbage_type)
 
         garbage_density = float(garbage_weight) / float(garbage_volume)
-        unix_time       = int(datetime.timestamp(datetime.strptime(date_gathered, self.__date_format)))
+        unix_time       = int(datetime.timestamp(
+                            datetime.strptime(date_gathered, self.__date_format))
+                        )
 
-        self._collected_garbage[unix_time] = (garbage_type.lower(), float(garbage_weight), float(garbage_volume), garbage_density)
+        self._collected_garbage[unix_time] = (
+            garbage_type.lower(),
+            float(garbage_weight),
+            float(garbage_volume),
+            garbage_density
+        )
 
     def print_collected_garbage(self):
         for (key, values) in self._collected_garbage.items():
@@ -157,7 +165,7 @@ class Volunteer(Employee):
         else:
             parameter_to_get = 3
 
-        filtered_list = [values[parameter_to_get] for key, values in self._collected_garbage.items() if (values[0] == type_of_garbage.lower() and key >= start_date and key <= end_date)]
+        filtered_list = [values[parameter_to_get] for key, values in self._collected_garbage.items() if values[0] == type_of_garbage.lower() and key >= start_date and key <= end_date]
 
         return sum(filtered_list)
 

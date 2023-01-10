@@ -106,7 +106,8 @@ class TestSuite(unittest.TestCase):
         })
         self.assertEqual(
             test_data.get_base64_image(),
-            b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+            b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1H' +
+            b'AwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
         )
 
     def test_set_forbidden_photo_extension(self):
@@ -186,7 +187,11 @@ class TestSuite(unittest.TestCase):
 
         self.assertEqual(
             mock_stdout.getvalue(),
-            f"2023-01-03: garbage type - glass, garbage weight - 100.0, garbage volume - 5.0, garbage density - 20.0\n{date.today()}: garbage type - paper, garbage weight - 100.0, garbage volume - 2.0, garbage density - 50.0\n"
+            '2023-01-03: garbage type - glass, garbage weight - 100.0,' +
+            ' garbage volume - 5.0, garbage density - 20.0' +
+            f'\n{date.today()}' +
+            ': garbage type - paper, garbage weight - 100.0,' +
+            ' garbage volume - 2.0, garbage density - 50.0\n'
         )
 
     def test_filter_garbage(self):
@@ -242,7 +247,9 @@ class TestSuite(unittest.TestCase):
 
         self.assertEqual(
             mock_stdout.getvalue(),
-            '460.0: glass weight\n20.0: glass volume\n92.0: glass density\n100.0: paper weight\n2.0: paper volume\n50.0: paper density\n100.0: plastic weight\n10.0: plastic volume\n10.0: plastic density\n'
+            '460.0: glass weight\n20.0: glass volume\n92.0: glass density\n' +
+            '100.0: paper weight\n2.0: paper volume\n50.0: paper density\n' +
+            '100.0: plastic weight\n10.0: plastic volume\n10.0: plastic density\n'
         )
 
 if __name__ == '__main__':
