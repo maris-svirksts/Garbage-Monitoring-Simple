@@ -6,6 +6,10 @@ from garbage_monitoring import helpers
 
 class Employee:
     """Parent class. Contains functionality used by both Admin and Volunteer classes."""
+
+    # pylint: disable=too-many-instance-attributes
+    # Eight is reasonable in this case.
+
     def __init__(self, parameters):
         self.__created     = int(datetime.now().timestamp())
         self.name          = parameters.get('name')
@@ -18,10 +22,12 @@ class Employee:
 
     @property
     def created(self):
+        """A variable getter function."""
         return self.__created
 
     @property
     def name(self):
+        """A variable getter function."""
         return self._name
 
     @name.setter
@@ -30,6 +36,7 @@ class Employee:
 
     @property
     def surname(self):
+        """A variable getter function."""
         return self._name
 
     @surname.setter
@@ -38,6 +45,7 @@ class Employee:
 
     @property
     def year_of_birth(self):
+        """A variable getter function."""
         return self._year_of_birth
 
     @year_of_birth.setter
@@ -54,6 +62,7 @@ class Employee:
 
     @property
     def email(self):
+        """A variable getter function."""
         return self._email
 
     @email.setter
@@ -66,6 +75,7 @@ class Employee:
 
     @property
     def mobile(self):
+        """A variable getter function."""
         return self._mobile
 
     @mobile.setter
@@ -77,6 +87,7 @@ class Employee:
 
     @property
     def photo(self):
+        """A variable getter function."""
         return self._photo
 
     @photo.setter
@@ -86,21 +97,27 @@ class Employee:
             self._photo = helpers.base64_encode_photo(value)
 
     def get_full_name(self):
+        """Return name, surname and email as preformated string."""
         return f"<{self._name} {self._surname}> {self._email}"
 
     def get_year_of_birth(self):
+        """A variable getter function."""
         return self._year_of_birth
 
     def get_email(self):
+        """A variable getter function."""
         return self._email
 
     def get_mobile(self):
+        """A variable getter function."""
         return self._mobile
 
     def get_base64_image(self):
+        """A variable getter function."""
         return self._photo
 
     def export_photo(self, result_image):
+        """Save a photo from string to file."""
         helpers.base64_photo_to_file(self._photo, result_image)
 
 class Admin(Employee):
@@ -111,6 +128,7 @@ class Admin(Employee):
 
     @property
     def is_admin(self):
+        """A variable getter function."""
         return self._is_admin
 
     @is_admin.setter
@@ -144,36 +162,53 @@ class Volunteer(Employee):
         )
 
     def print_collected_garbage(self):
+        """Print overall garbage data."""
         for (key, values) in self._collected_garbage.items():
-            print(f"{datetime.fromtimestamp(key).strftime(self.__date_format)}: garbage type - {values[0]}, garbage weight - {values[1]}, garbage volume - {values[2]}, garbage density - {values[3]}")
+            print(
+                f"{datetime.fromtimestamp(key).strftime(self.__date_format)}: "
+                f"garbage type - {values[0]}, garbage weight - {values[1]}, "
+                f"garbage volume - {values[2]}, garbage density - {values[3]}")
 
-    def calculate_sums(self, type_of_garbage, garbage_parameter, start_date = '', end_date = ''):
-        if not start_date:
+    def calculate_sums(self, parameters):
+        """Total amount of various types of garbage."""
+        if not parameters.get('start_date'):
             start_date = min(self._collected_garbage)
         else:
-            start_date = int(datetime.timestamp(datetime.strptime(start_date, self.__date_format)))
+            start_date = int(datetime.timestamp(
+                datetime.strptime(parameters.get('start_date'), self.__date_format)))
 
-        if not end_date:
+        if not parameters.get('end_date'):
             end_date = max(self._collected_garbage)
         else:
-            end_date = int(datetime.timestamp(datetime.strptime(end_date, self.__date_format)))
+            end_date = int(datetime.timestamp(
+                datetime.strptime(parameters.get('end_date'), self.__date_format)))
 
-        if 'weight' == garbage_parameter:
+        if 'weight' == parameters.get('garbage_parameter'):
             parameter_to_get = 1
-        elif 'volume' == garbage_parameter:
+        elif 'volume' == parameters.get('garbage_parameter'):
             parameter_to_get = 2
         else:
             parameter_to_get = 3
 
-        filtered_list = [values[parameter_to_get] for key, values in self._collected_garbage.items() if values[0] == type_of_garbage.lower() and key >= start_date and key <= end_date]
+        filtered_list = [
+            values[parameter_to_get] for key, values in self._collected_garbage.items()
+                if values[0] == parameters.get('type_of_garbage').lower()
+                and start_date <= key <= end_date]
 
         return sum(filtered_list)
 
-    # Summing density is of dubious usage, still: was described so in the requirements. In real life would ask for confirmation.
     def total_sums(self):
-        garbage_type = ["glass", "paper", "plastic"]
-        parameter    = ['weight', 'volume', 'density']
+        """Print all sums for garbage types."""
+        #TODO: move types and parameters to an outside location (everywhere).
+        #TODO: Summing density is of dubious usage, still: was described so in the requirements.
+        type_of_garbage   = ["glass", "paper", "plastic"]
+        garbage_parameter = ['weight', 'volume', 'density']
 
-        for current_element in garbage_type:
-            for current_parameter in parameter:
-                print(f"{self.calculate_sums(current_element, current_parameter)}: {current_element} {current_parameter}")
+        for current_element in type_of_garbage:
+            for current_parameter in garbage_parameter:
+                results = self.calculate_sums({
+                    'type_of_garbage': current_element,
+                    'garbage_parameter': current_parameter})
+                print(
+                    f"{results}: "
+                    f"{current_element} {current_parameter}")

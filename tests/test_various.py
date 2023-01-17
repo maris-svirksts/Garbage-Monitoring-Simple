@@ -213,12 +213,12 @@ class TestSuite(unittest.TestCase):
         test_data.add_collected_garbage('paper', 100, 2)
 
         self.assertEqual(
-            test_data.calculate_sums(
-                'glass',
-                'weight',
-                '2023-01-04',
-                '2023-01-06'
-            ),
+            test_data.calculate_sums({
+                'type_of_garbage': 'glass',
+                'garbage_parameter': 'weight',
+                'start_date': '2023-01-04',
+                'end_date': '2023-01-06'
+            }),
             float(210)
         )
 
